@@ -1,0 +1,265 @@
+var start = true;
+var circle = false;
+var word = false;
+var snake = false;
+//snake
+var Snakes;
+//var snakes2;
+
+//food
+var food;
+
+//turns on the different directions
+var leftOn = false;
+var rightOn = true;
+var upOn = false;
+var downOn = false;
+
+//variables for the food could have be re-written as a class
+var x;
+var y;
+var z;
+
+//array of colors
+var colors = [];
+
+//color vars
+var r;
+var o;
+var y;
+var g;
+var b;
+var p;
+var foodColor;
+
+
+
+function setup() {
+  background(255);
+
+  //gets rid of cursor to make it look nicer
+  createCanvas(windowWidth - (windowWidth % 10), windowHeight - (windowHeight % 10));
+
+  //calls the snake function makes the snake
+  Snakes = new Snake();
+  //picks a place to put the food
+  foodSpot();
+  frameRate(30);
+
+  //sets the colors and the array
+  r = color(255, 0, 0, 50);
+  o = color(255, 203, 116, 50);
+  y = color(255, 255, 116, 50);
+  g = color(0, 255, 0, 50);
+  b = color(66, 189, 255, 50);
+  p = color(192, 119, 232, 50);
+  colors = [r, o, y, g, b, p];
+}
+
+function draw() {
+  if (start === true) {
+    background(255);
+    main();
+  }
+  if (circle === true) {
+    background(255);
+    circles();
+  }
+  if (word === true) {
+    words();
+  }
+  if (snake === true) {
+    snakes();
+  }
+}
+
+function main() {
+  noStroke();
+  fill(255, 0, 0);
+  ellipse(width / 2, height / 6, height / 3, height / 3);
+  fill(251, 233, 91);
+  ellipse(width / 2, height / 2, height / 3, height / 3);
+  fill(0, 255, 0);
+  ellipse(width / 2, 5 * (height / 6), height / 3, height / 3);
+}
+
+function circles() {
+  ellipseMode(CENTER);
+  for (var j = 0; j <= width; j += 20) {
+    for (var i = 0; i <= height; i += 20) {
+      stroke(i / (height / 150), 85, j / (width / 150));
+      noFill();
+      ellipse(width / 2, height / 2, i, j);
+    }
+  }
+}
+
+function words() {
+  textAlign(CENTER);
+  textSize(100);
+  background(mouseX);
+  noFill();
+  fill(width - mouseX);
+  text("NIGHT & DAY", width / 2, height / 2);
+}
+
+
+//picks a place to put the food
+//inspired by Shiffmans Snake Game Challenge
+//by putting the random picker in a function it won't randomly
+//plant food everywhere
+//floor and % keepts it as a grid
+function foodSpot() {
+  //random values for where to put the food and color
+  x = floor(random(width));
+  y = floor(random(height));
+  z = floor(random(6));
+
+  //stores values, could also have been made into a class
+  food = createVector(x - (x % 10), y - (y % 10));
+}
+
+function snakes() {
+  ellipseMode(CENTER);
+  //decides direction each one calls the function to move it in that direction
+  if (upOn === true) {
+    Snakes.moveUp();
+  }
+  if (downOn === true) {
+    Snakes.moveDown();
+  }
+  if (leftOn === true) {
+    Snakes.moveLeft();
+  }
+  if (rightOn === true) {
+    Snakes.moveRight();
+  }
+
+  if (Snakes.ate(food)) {
+    foodSpot();
+  }
+  noStroke();
+  foodColor = colors[z];
+  fill(foodColor);
+  ellipse(food.x, food.y, 10, 10);
+  //calls the functions
+  Snakes.update();
+  Snakes.show();
+}
+
+function keyPressed() {
+  //used to call the different direction functions
+  if (keyCode == UP_ARROW) {
+    upOn = true;
+    downOn = false;
+    leftOn = false;
+    rightOn = false;
+  } else if (keyCode == DOWN_ARROW) {
+    upOn = false;
+    downOn = true;
+    leftOn = false;
+    rightOn = false;
+  } else if (keyCode == LEFT_ARROW) {
+    upOn = false;
+    downOn = false;
+    leftOn = true;
+    rightOn = false;
+  } else if (keyCode == RIGHT_ARROW) {
+    upOn = false;
+    downOn = false;
+    leftOn = false;
+    rightOn = true;
+  } else if (keyCode == ENTER || keyCode === RETURN) {
+    start = true;
+    circle = false;
+    word = false;
+    snake = false;
+  }
+  if(key == ' '){
+    background(0);
+  }
+}
+
+function Snake() {
+  //startes the "snake"
+  this.head = createVector((width / 2) - ((width / 2) % 10), (height / 2) - ((height / 2) % 10));
+
+  //velocity of the snake
+  this.speed = createVector(10, 0);
+
+  this.ate = function(food) {
+    if (this.head.x == food.x && this.head.y == food.y) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
+  //updating where the head is
+  this.update = function() {
+    //updates place
+    this.head.add(this.speed);
+  }
+
+  //shows where the snake is
+  this.show = function() {
+    ellipse(this.head.x, this.head.y, 10, 10);
+  }
+
+  //changes the speed and direction
+  this.moveLeft = function() {
+    this.speed.x = -10;
+    this.speed.y = 0;
+    if (this.head.x <= 0) {
+      this.head.x = width;
+    }
+  }
+
+  this.moveRight = function() {
+    this.speed.x = 10;
+    this.speed.y = 0;
+    if (this.head.x >= width) {
+      this.head.x = 0;
+    }
+  }
+
+  this.moveUp = function() {
+    this.speed.x = 0;
+    this.speed.y = -10;
+    if (this.head.y <= 0) {
+      this.head.y = height;
+    }
+  }
+
+  this.moveDown = function() {
+    this.speed.x = 0;
+    this.speed.y = 10;
+    if (this.head.y >= height) {
+      this.head.y = 0;
+    }
+  }
+}
+
+
+
+function mouseReleased() {
+  if (abs(dist(mouseX, mouseY, width / 2, height / 6)) < height / 6) {
+    start = false;
+    circle = true;
+    word = false;
+    snake = false;
+  }
+  if (abs(dist(mouseX, mouseY, width / 2, height / 2)) < height / 6) {
+    start = false;
+    circle = false;
+    word = true;
+    snake = false;
+  }
+  if (abs(dist(mouseX, mouseY, width / 2, 5 * (height / 6))) < height / 6) {
+    start = false;
+    circle = false;
+    word = false;
+    snake = true;
+  }
+}
